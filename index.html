@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Книга правил — Дядя Жора</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #14100d;
+      --surface: #1f1814;
+      --surface-2: #2a201a;
+      --border: rgba(224, 168, 84, 0.22);
+      --gold: #e0a854;
+      --gold-bright: #f6cd84;
+      --text: #f5efe6;
+      --muted: #b8a797;
+      --accent-green: #58c98a;
+      --accent-red: #e86a5e;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0;
+      padding: 0 14px 36px;
+      background: radial-gradient(circle at 18% 0%, rgba(224, 168, 84, 0.14), transparent 46%),
+                  radial-gradient(circle at 88% 12%, rgba(168, 92, 38, 0.12), transparent 40%),
+                  var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.48;
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .hero {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 4px 14px;
+    }
+
+    .avatar-ring {
+      flex: 0 0 68px;
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      padding: 2.5px;
+      background: linear-gradient(135deg, var(--gold-bright), #8b5620);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    }
+
+    .avatar-ring img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      display: block;
+    }
+
+    .hero-text h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--gold-bright);
+    }
+
+    .hero-text p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* Filter Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 2px 14px;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+
+    .tab {
+      flex: 0 0 auto;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 13px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, #e0a854, #b7772a);
+      color: #16100c;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(224, 168, 84, 0.28);
+    }
+
+    /* Cards */
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .card.open {
+      border-color: rgba(246, 205, 132, 0.52);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+    }
+
+    .card-head {
+      width: 100%;
+      background: transparent;
+      border: 0;
+      color: inherit;
+      text-align: left;
+      padding: 14px 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .icon-box {
+      flex: 0 0 44px;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .head-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .head-title {
+      font-size: 16px;
+      font-weight: 750;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .head-sub {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .chev {
+      font-size: 13px;
+      color: var(--gold);
+      transition: transform 0.2s ease;
+      padding-left: 4px;
+    }
+
+    .card.open .chev {
+      transform: rotate(180deg);
+    }
+
+    .card-body {
+      display: none;
+      padding: 0 15px 16px;
+      border-top: 1px solid rgba(224, 168, 84, 0.12);
+    }
+
+    .card.open .card-body {
+      display: block;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 12px 0;
+    }
+
+    .pill {
+      font-size: 12px;
+      padding: 4px 9px;
+      border-radius: 8px;
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .cmd-btn {
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: rgba(224, 168, 84, 0.16);
+      color: var(--gold-bright);
+      border: 1px solid rgba(224, 168, 84, 0.45);
+      cursor: pointer;
+    }
+
+    .quote-box {
+      background: rgba(224, 168, 84, 0.08);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 10px 10px 0;
+      padding: 10px 12px;
+      font-size: 13.5px;
+      margin: 10px 0 12px;
+      color: var(--text);
+    }
+
+    .sec-title {
+      font-size: 13px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--gold);
+      margin: 12px 0 6px;
+    }
+
+    .steps {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      font-size: 13.5px;
+    }
+
+    .steps li {
+      background: rgba(255, 255, 255, 0.025);
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+
+    .rewards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .reward-pill {
+      font-size: 12px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(88, 201, 138, 0.12);
+      color: #a9f0c8;
+      border: 1px solid rgba(88, 201, 138, 0.28);
+    }
+
+    .tip {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* Notebook traits */
+    .trait-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .trait-item {
+      background: rgba(255, 255, 255, 0.025);
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-size: 13px;
+    }
+
+    .trait-top {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .bar {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      margin-bottom: 5px;
+    }
+
+    .bar > span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #b7772a, #f6cd84);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%) translateY(20px);
+      background: #2f231b;
+      color: var(--gold-bright);
+      border: 1px solid var(--gold);
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      z-index: 99;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="avatar-ring">
+        <img src="./avatar.jpg" alt="Дядя Жора" />
+      </div>
+      <div class="hero-text">
+        <h1>Книга правил Дяди Жоры</h1>
+        <p>Выбирай игру — нажми на карточку, чтобы открыть правила и скопировать команду</p>
+      </div>
+    </header>
+
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-cat="all">Все (8)</button>
+      <button class="tab" data-cat="fast">⚡ Быстрые</button>
+      <button class="tab" data-cat="bluff">🎭 Блеф</button>
+      <button class="tab" data-cat="humor">😂 Юмор</button>
+      <button class="tab" data-cat="mafia">🌃 Мафия</button>
+      <button class="tab" data-cat="notebook">📓 Тетрадка</button>
+    </nav>
+
+    <main class="list" id="cards"></main>
+  </div>
+
+  <div class="toast" id="toast">Скопировано!</div>
+
+  <script>
+    const tg = window.Telegram && window.Telegram.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      try {
+        tg.setHeaderColor("#14100d");
+        tg.setBackgroundColor("#14100d");
+      } catch (e) {}
+    }
+
+    const GAMES = [
+      {
+        key: "sp",
+        cat: ["fast", "bluff"],
+        icon: "💰",
+        title: "Делим банк",
+        sub: "Психология, жадность и блеф в парах",
+        players: "2–20 чел",
+        time: "~5 мин",
+        dm: "Нужна личка",
+        cmd: "/split",
+        essence: "В каждом раунде вы делитесь на пары и в личке жмёте «Поделить» или «Украсть». Оба делят — куш пополам. Один крадёт — забирает всё. Оба крадут — оба сгорают с нулём!",
+        steps: [
+          "1️⃣ Бот разбивает стол на пары (3 раунда). У кого Доверие ниже 30% — Жора предупреждает стол!",
+          "2️⃣ 30 секунд в общем чате на уговоры, клятвы и блеф.",
+          "3️⃣ 25 секунд в ЛС на тайный выбор: 🤝 Поделить или 🐍 Украсть."
+        ],
+        rewards: ["+фишки из банка", "+3 Доверие за честность", "+4 Хитрость / -8 Доверие за кражу"],
+        tip: "Один раз кинуть выгодно, но в следующих раундах тебе уже никто не поверит!"
+      },
+      {
+        key: "uc",
+        cat: ["bluff"],
+        icon: "🕵️",
+        title: "Под прикрытием",
+        sub: "Ассоциации и поиск чужого по слову",
+        players: "4–20 чел",
+        time: "~6 мин",
+        dm: "Нужна личка",
+        cmd: "/undercover",
+        essence: "Почти все получают одно слово (например, «Кофе»), а 1–2 «чужих» — похожее («Чай»). Никто не знает, свой он или чужой!",
+        steps: [
+          "1️⃣ Секретное слово приходит каждому в личку.",
+          "2️⃣ 45 секунд в чате: кидайте по 1 тонкой ассоциации на своё слово, не называя его прямо.",
+          "3️⃣ Голосование кнопками (35 сек): выгоняем подозреваемого и смотрим, угадали ли."
+        ],
+        rewards: ["+140 фишек победителям", "+4 Чутьё своим", "+5 Хитрость чужим"],
+        tip: "Не пиши слишком очевидную подсказку в первом круге — иначе чужой сразу подстроится!"
+      },
+      {
+        key: "mb",
+        cat: ["humor"],
+        icon: "🎤",
+        title: "Мем-битва",
+        sub: "Открытый микрофон: картинки, GIF и шутки",
+        players: "2–20 чел",
+        time: "~5 мин",
+        dm: "Нужна личка",
+        cmd: "/memebattle",
+        essence: "Жора задаёт жизненную ситуацию, участники тайно кидают в ЛС картинку, гифку, стикер или подпись — чат голосует за самый угарный лот!",
+        steps: [
+          "1️⃣ В чат вылетает тема раунда (например: «Когда сказал я на одну катку в 23:00»).",
+          "2️⃣ 65 секунд на отправку своего мема/шутки боту в личку.",
+          "3️⃣ Анонимный показ всех работ в чате и голосование кнопками (за себя голосовать нельзя)."
+        ],
+        rewards: ["+150 фишек победителю", "+5 Юмор", "+20 фишек за каждый голос"],
+        tip: "Локальные мемы и старые стикеры вашего чата побеждают почти всегда!"
+      },
+      {
+        key: "bm",
+        cat: ["fast"],
+        icon: "💣",
+        title: "Тикающая бомба",
+        sub: "Слова на скорость прямо в чате",
+        players: "2–15 чел",
+        time: "3–5 мин",
+        dm: "Без лички",
+        cmd: "/bomb",
+        essence: "У тебя в руках бомба со скрытым таймером (16–28 сек) и слогом (например, КА). Успей написать в чат русское слово с этим слогом, чтобы передать бомбу дальше!",
+        steps: [
+          "1️⃣ Жора зажигает фитиль, называет слог и первого игрока.",
+          "2️⃣ Активный игрок пишет в чат русское слово (от 3 букв) с этим слогом без повторов.",
+          "3️⃣ У кого бомба рванула — выбывает. Побеждает последний выживший сапёр!"
+        ],
+        rewards: ["+150 фишек победителю", "+5 Фарт", "+2 Вайб"],
+        tip: "Держи пару длинных слов в голове заранее — простые слова разбирают в первую секунду!"
+      },
+      {
+        key: "fb",
+        cat: ["humor", "bluff"],
+        icon: "📜",
+        title: "Бредогенератор",
+        sub: "Придумай правдоподобную ложь к реальному факту",
+        players: "2–20 чел",
+        time: "~7 мин",
+        dm: "Нужна личка",
+        cmd: "/fib",
+        essence: "3 реальных удивительных факта с пропущенным словом. Очки дают за найденную правду И за каждого игрока, который поверил в твою выдумку!",
+        steps: [
+          "1️⃣ Показывается факт с пропуском [ _____ ].",
+          "2️⃣ 45 секунд на отправку своей правдоподобной лжи боту в ЛС.",
+          "3️⃣ Голосование (35 сек): +100 очков за правду и +60 за каждого, кто клюнул на твою байку."
+        ],
+        rewards: ["+3 Чутьё за правду", "+3 Хитрость и +2 Юмор за байку", "Фишки по итогам очков"],
+        tip: "Не пиши явную клоунаду — звучи как скучная статья из энциклопедии!"
+      },
+      {
+        key: "sb",
+        cat: ["bluff"],
+        icon: "🚨",
+        title: "Саботаж",
+        sub: "Командные миссии без выбывания (как Авалон)",
+        players: "5–12 чел",
+        time: "~12 мин",
+        dm: "Нужна личка",
+        cmd: "/sabotage",
+        essence: "Никто не вылетает до конца! Честные пытаются провести 3 успешные миссии, а тайные саботажники — завалить 3 миссии изнутри.",
+        steps: [
+          "1️⃣ В ЛС приходят роли: саботажники знают друг друга, честные — нет.",
+          "2️⃣ Лидер собирает отряд на миссию, весь чат голосует за одобрение состава.",
+          "3️⃣ Участники отряда тайно жмут в ЛС ✅ Успех или 💥 Саботаж. Один саботаж валит миссию!"
+        ],
+        rewards: ["+160 фишек победителям", "+5 Чутьё честным", "+5 Хитрость саботажникам"],
+        tip: "Следи, кто упорно берёт в отряд одного и того же человека после провала!"
+      },
+      {
+        key: "dl",
+        cat: ["fast"],
+        icon: "🔫",
+        title: "Русская рулетка",
+        sub: "Азартная дуэль за стойкой на 100 фишек",
+        players: "2–6 чел",
+        time: "~1 мин",
+        dm: "Без лички",
+        cmd: "/duel",
+        essence: "Все скидываются по 100 фишек в общий банк, Жора крутит шестизарядный барабан. Выжил последним — забираешь весь котёл!",
+        steps: [
+          "1️⃣ Заходишь за стол (ставка 100 фишек; если пусто — Жора наливает в кредит).",
+          "2️⃣ Каждые 2 секунды следующий игрок спускает курок, барабан обновляется после выстрела.",
+          "3️⃣ Последний уцелевший забирает весь банк!"
+        ],
+        rewards: ["Весь банк фишек", "+5 Фарт", "+2 Вайб"],
+        tip: "Идеально, чтобы быстро разыграть спор или скоротать минуту перед большой игрой!"
+      },
+      {
+        key: "mafia",
+        cat: ["mafia", "bluff"],
+        icon: "🌃",
+        title: "Мафия Ривердейла",
+        sub: "Классическая ночная ролевая дедукция",
+        players: "от 4 чел",
+        time: "15–25 мин",
+        dm: "Нужна личка",
+        cmd: "/game",
+        essence: "Днём город обсуждает улики и голосует, кого повесить. Ночью мафия, доктор, шериф и одиночки делают свои ходы в личке с ботом.",
+        steps: [
+          "1️⃣ Набор по /game, старт по /start, список всех ролей — /roles.",
+          "2️⃣ Ночь: активные роли выбирают цели в ЛС, а мафия переписывается между собой через бота.",
+          "3️⃣ День и суд: обсуждение в чате, голосование в ЛС и финальное подтверждение 👍/👎."
+        ],
+        rewards: ["+140 фишек за победу", "+3 Хитрость / +3 Чутьё / +4 Фарт", "Зачёт напарникам"],
+        tip: "Перед первой партией загляни в /roles — в Ривердейле много хитрых ролей!"
+      }
+    ];
+
+    const NOTEBOOK_HTML = `
+      <article class="card open" data-key="notebook">
+        <button class="card-head" type="button">
+          <div class="icon-box">📓</div>
+          <div class="head-main">
+            <div class="head-title">Чёрная тетрадка и титулы</div>
+            <div class="head-sub">Как растут 6 характеристик в /me и что купить в /shop</div>
+          </div>
+          <span class="chev">▼</span>
+        </button>
+        <div class="card-body">
+          <div class="meta-row">
+            <button class="cmd-btn" data-copy="/me">📋 /me</button>
+            <button class="cmd-btn" data-copy="/top">📋 /top</button>
+            <button class="cmd-btn" data-copy="/shop">📋 /shop</button>
+            <button class="cmd-btn" data-copy="/nalit">📋 /nalit</button>
+          </div>
+          <div class="quote-box">
+            Все игры, мемы, цитаты <code>/quote</code>, коктейли <code>/nalit</code> и смеющиеся реакции 😂 в чате качают твои характеристики и автоматически выдают титул!
+          </div>
+          <div class="sec-title">Шесть характеристик (0–100)</div>
+          <div class="trait-grid">
+            <div class="trait-item">
+              <div class="trait-top"><span>🎭 Хитрость</span><span>Блеф и саботаж</span></div>
+              <div class="bar"><span style="width:82%"></span></div>
+              Кража банка, победа за саботажника/шпиона/мафию, удачная ложь в Бредогенераторе.
+            </div>
+            <div class="trait-item">
+              <div class="trait-top"><span>🔍 Чутьё</span><span>Интуиция</span></div>
+              <div class="bar"><span style="width:74%"></span></div>
+              Разоблачение чужих и саботажников, поиск правды, победы за мирных.
+            </div>
+            <div class="trait-item">
+              <div class="trait-top"><span>🍀 Фарт</span><span>Везение</span></div>
+              <div class="bar"><span style="width:66%"></span></div>
+              Победы в Тикающей бомбе, Русской рулетке и удачные коктейли дня.
+            </div>
+            <div class="trait-item">
+              <div class="trait-top"><span>😂 Юмор</span><span>Мемолог</span></div>
+              <div class="bar"><span style="width:88%"></span></div>
+              Победы в Мем-битве, попадание в цитатник /quote и реакции 😂/🔥 на твои сообщения.
+            </div>
+            <div class="trait-item">
+              <div class="trait-top"><span>🔥 Вайб</span><span>Душа компании</span></div>
+              <div class="bar"><span style="width:92%"></span></div>
+              Участие в играх, /nalit и угощение других фишками через /gift.
+            </div>
+            <div class="trait-item">
+              <div class="trait-top"><span>🤝 Доверие</span><span>Карма</span></div>
+              <div class="bar"><span style="width:85%"></span></div>
+              Растёт за честный делёж и падает за предательства. Ниже 30% — Жора предупреждает стол!
+            </div>
+          </div>
+          <div class="sec-title">Популярные титулы</div>
+          <div class="rewards">
+            <span class="reward-pill">🔥 Душа тусовки (Вайб + Доверие)</span>
+            <span class="reward-pill">🎭 Стендапер-шулер (Юмор + Хитрость)</span>
+            <span class="reward-pill">🔍 Детектор лжи (Чутьё + Доверие)</span>
+            <span class="reward-pill">🐍 Крыса в законе (Хитрость + низкое Доверие)</span>
+          </div>
+          <div class="tip">💡 Фишки можно тратить в /shop на значок у ника (🎩 🥃 🎭 👑) или «откуп от позора» (+15% к Доверию).</div>
+        </div>
+      </article>
+    `;
+
+    let activeCat = "all";
+    let openKey = null;
+
+    const params = new URLSearchParams(window.location.search);
+    const initialGame = (params.get("game") || window.location.hash.replace("#", "") || "").toLowerCase();
+    if (initialGame === "notebook") {
+      activeCat = "notebook";
+      openKey = "notebook";
+    } else if (GAMES.some(g => g.key === initialGame)) {
+      openKey = initialGame;
+    }
+
+    const cardsEl = document.getElementById("cards");
+    const tabsEl = document.getElementById("tabs");
+    const toastEl = document.getElementById("toast");
+    let toastTimer = null;
+
+    function haptic() {
+      try { tg && tg.HapticFeedback && tg.HapticFeedback.selectionChanged(); } catch (e) {}
+    }
+
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1600);
+    }
+
+    function copyText(txt) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).catch(() => {});
+      }
+      haptic();
+      showToast("Команда " + txt + " скопирована!");
+    }
+
+    function render() {
+      if (activeCat === "notebook") {
+        cardsEl.innerHTML = NOTEBOOK_HTML;
+        bindEvents();
+        return;
+      }
+      const list = activeCat === "all" ? GAMES : GAMES.filter(g => g.cat.includes(activeCat));
+      cardsEl.innerHTML = list.map(g => {
+        const isOpen = openKey === g.key;
+        return `
+          <article class="card ${isOpen ? "open" : ""}" data-key="${g.key}">
+            <button class="card-head" type="button">
+              <div class="icon-box">${g.icon}</div>
+              <div class="head-main">
+                <div class="head-title">${g.title}</div>
+                <div class="head-sub">${g.sub}</div>
+              </div>
+              <span class="chev">▼</span>
+            </button>
+            <div class="card-body">
+              <div class="meta-row">
+                <span class="pill">👥 ${g.players}</span>
+                <span class="pill">⏱ ${g.time}</span>
+                <span class="pill">📩 ${g.dm}</span>
+                <button class="cmd-btn" data-copy="${g.cmd}">📋 ${g.cmd}</button>
+              </div>
+              <div class="quote-box">🎯 <b>Суть:</b> ${g.essence}</div>
+              <div class="sec-title">Как проходит игра</div>
+              <ul class="steps">
+                ${g.steps.map(s => `<li>${s}</li>`).join("")}
+              </ul>
+              <div class="sec-title">Награды в Чёрную тетрадку</div>
+              <div class="rewards">
+                ${g.rewards.map(r => `<span class="reward-pill">${r}</span>`).join("")}
+              </div>
+              <div class="tip">💡 Совет Дяди Жоры: ${g.tip}</div>
+            </div>
+          </article>
+        `;
+      }).join("");
+      bindEvents();
+    }
+
+    function bindEvents() {
+      cardsEl.querySelectorAll(".card-head").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const card = btn.closest(".card");
+          const key = card.dataset.key;
+          haptic();
+          if (key === "notebook") {
+            card.classList.toggle("open");
+            return;
+          }
+          openKey = (openKey === key) ? null : key;
+          render();
+        });
+      });
+      cardsEl.querySelectorAll(".cmd-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          copyText(btn.dataset.copy);
+        });
+      });
+    }
+
+    tabsEl.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        haptic();
+        tabsEl.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        activeCat = tab.dataset.cat;
+        render();
+      });
+    });
+
+    if (activeCat !== "all") {
+      tabsEl.querySelectorAll(".tab").forEach(t => {
+        t.classList.toggle("active", t.dataset.cat === activeCat);
+      });
+    }
+    render();
+    if (openKey) {
+      const target = cardsEl.querySelector(`[data-key="${openKey}"]`);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  </script>
+</body>
+</html>
